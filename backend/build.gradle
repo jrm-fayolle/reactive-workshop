@@ -13,10 +13,11 @@ dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     compile "com.opencsv:opencsv:${opencsvVersion}"
 
-    compile "com.h2database:h2:${h2Version}"
+    compile "org.postgresql:postgresql"
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
     developmentOnly("org.springframework.boot:spring-boot-devtools")

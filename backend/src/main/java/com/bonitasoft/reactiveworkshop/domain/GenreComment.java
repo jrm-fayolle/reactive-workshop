@@ -5,12 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Comment {
-	private String artist;
+public class GenreComment {
+	private String artistId;
+	private String artistName;
 	private String userName;
-	private String comment;	
+	private String comment;
 }

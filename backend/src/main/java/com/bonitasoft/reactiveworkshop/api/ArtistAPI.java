@@ -2,6 +2,7 @@ package com.bonitasoft.reactiveworkshop.api;
 
 import java.util.List;
 
+import com.bonitasoft.reactiveworkshop.Constants;
 import com.bonitasoft.reactiveworkshop.domain.Artist;
 import com.bonitasoft.reactiveworkshop.domain.ArtistsComment;
 import com.bonitasoft.reactiveworkshop.domain.Comment;
@@ -16,8 +17,6 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 public class ArtistAPI {
-
-	static String COMMENT_URI = "http://localhost:3004";
 
 	private ArtistRepository artistRepository;
 	private RestTemplate restTemplate;
@@ -35,7 +34,7 @@ public class ArtistAPI {
 	@GetMapping("/artist/{id}/comments")
 	public ArtistsComment findCommentsById(@PathVariable String id) throws NotFoundException {
 		Artist artist = artistRepository.findById(id).orElseThrow(NotFoundException::new);
-		Comment[] comments = restTemplate.getForObject(COMMENT_URI + "/comments/{id}/last10", Comment[].class, id);
+		Comment[] comments = restTemplate.getForObject(Constants.COMMENT_URI + Constants.COMMENTS_ARTIST_LAST10, Comment[].class, id);
 		for (int i = 0; i < comments.length; i++) {
 			comments[i].setArtist(null);
 		}

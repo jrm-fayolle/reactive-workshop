@@ -1,5 +1,7 @@
 package com.bonitasoft.reactiveworkshop;
 
+import javax.persistence.EntityManager;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -13,10 +15,9 @@ public class ReactiveWorkshopApplication {
 		SpringApplication.run(ReactiveWorkshopApplication.class, args);
 	}
 
-
 	@Bean
 	RestTemplate client() {
-		return new RestTemplateBuilder().rootUri("http://localhost:3004").build();
+		return new RestTemplateBuilder().rootUri(Constants.COMMENT_URI).build();
 	}
 
 }
