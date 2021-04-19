@@ -1,12 +1,11 @@
 package com.bonitasoft.reactiveworkshop;
 
-import javax.persistence.EntityManager;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @SpringBootApplication
 public class ReactiveWorkshopApplication {
@@ -20,4 +19,10 @@ public class ReactiveWorkshopApplication {
 		return new RestTemplateBuilder().rootUri(Constants.COMMENT_URI).build();
 	}
 
+	@Bean
+	WebClient webClient() {
+		return WebClient.create(Constants.COMMENT_URI);
+	}
+	
+	
 }

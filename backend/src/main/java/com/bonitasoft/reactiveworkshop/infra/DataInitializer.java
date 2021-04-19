@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import com.bonitasoft.reactiveworkshop.Constants;
@@ -66,20 +67,24 @@ public class DataInitializer implements ApplicationListener<ApplicationReadyEven
 					.forEach(artistRepository::save);
 		}
 
-		WebClient webClient = WebClient.create(Constants.COMMENT_URI);
-		Flux<Comment> results = webClient.get().uri(Constants.COMMENTS_STREAM).retrieve().bodyToFlux(Comment.class);
-		results.subscribe(result -> {
-			String md5 = md5(result.getArtist() + result.getUserName() + result.getComment());
-			commentRepository.save(CommentFull.builder()
-					.id(md5)
-					.artistId(result.getArtist())
-					.userName(result.getUserName())
-					.comment(result.getComment())
-					.build());
-		});
+//		WebClient webClient = WebClient.create(Constants.COMMENT_URI);
+//		Flux<Comment> results = webClient.get().uri(Constants.COMMENTS_STREAM).retrieve().bodyToFlux(Comment.class);
+//		results.subscribe(result -> {
+//			Optional<Artist> artist = artistRepository.findById(result.getArtist());
+//			String md5 = md5(result.getArtist() + result.getUserName() + result.getComment());
+//			if (!artist.isPresent()) {
+//				return;
+//			}
+//			commentRepository.save(CommentFull.builder()
+//					.id(md5)
+//					.artistId(result.getArtist())
+//					.userName(result.getUserName())
+//					.comment(result.getComment())
+//					.build());
+//		});
 	}
 
-	private String md5(String name) {
+	public static String md5(String name) {
 		try {
 			return md5DigestAsHex(name.getBytes("UTF-8"));
 		}

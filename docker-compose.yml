@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:13.1
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 5432:5432
+    hostname: postgres
+    container_name: postgres
+    networks:
+      my-net:
+          ipv4_address: 192.168.14.3
+  backend:
+    image: backend-img
+    entrypoint: "java -jar ./backend-0.0.1-SNAPSHOT.jar"
+    ports:
+      - 8080:8080
+    hostname: backend-srv
+    container_name: backend-srv
+    depends_on:
+      - db
+    networks:
+      my-net:
+          ipv4_address: 192.168.14.4
+
+  external-service:
+    image: backend-img
+    ports:
+      - 3034:3034
+    entrypoint: "java -jar ./external-service-0.0.1-SNAPSHOT.jar"
+    hostname: external-service-srv
+    container_name: external-service
+    networks:
+      my-net:
+          ipv4_address: 192.168.14.5
+
+networks:
+  my-net:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 192.168.14.0/24
