@@ -15,7 +15,7 @@ services:
           ipv4_address: 192.168.14.3
   backend:
     image: backend-img
-    entrypoint: "java -jar ./backend-0.0.1-SNAPSHOT.jar"
+    entrypoint: "java  -Dexternal-service='http://192.168.14.5:3004' -jar ./backend-0.0.1-SNAPSHOT.jar"
     ports:
       - 8080:8080
     hostname: backend-srv
@@ -29,10 +29,12 @@ services:
   external-service:
     image: backend-img
     ports:
-      - 3034:3034
+      - 3004:3004
     entrypoint: "java -jar ./external-service-0.0.1-SNAPSHOT.jar"
     hostname: external-service-srv
     container_name: external-service
+    links:
+      - backend
     networks:
       my-net:
           ipv4_address: 192.168.14.5
