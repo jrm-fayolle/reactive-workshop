@@ -10,10 +10,10 @@ sourceCompatibility = "11"
 
 dependencies {
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-    compileOnly "org.projectlombok:lombok:${lombokVersion}"
-    compile "com.opencsv:opencsv:${opencsvVersion}"
+    implementation "org.projectlombok:lombok:${lombokVersion}"
+    implementation "com.opencsv:opencsv:${opencsvVersion}"
 
-    compile "org.postgresql:postgresql"
+    implementation("org.postgresql:postgresql")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
