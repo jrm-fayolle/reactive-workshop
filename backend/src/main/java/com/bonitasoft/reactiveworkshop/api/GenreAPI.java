@@ -1,6 +1,7 @@
 package com.bonitasoft.reactiveworkshop.api;
 
-import java.util.ArrayList;
+import java.net.http.HttpTimeoutException;
+import java.time.Duration;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,16 +26,19 @@ import com.bonitasoft.reactiveworkshop.infra.DataInitializer;
 import com.bonitasoft.reactiveworkshop.repository.ArtistRepository;
 import com.bonitasoft.reactiveworkshop.repository.CommentRepository;
 
+import io.netty.handler.timeout.ReadTimeoutException;
+import io.netty.handler.timeout.WriteTimeoutException;
 import reactor.core.publisher.Flux;
 
 @RestController
-public class GenreApi {
+public class GenreAPI {
 
 	private ArtistRepository artistRepository;
 	private CommentRepository commentRepository;
 	private WebClient webClient;
+	private static Logger logger = LoggerFactory.getLogger(GenreAPI.class);
 
-	public GenreApi(ArtistRepository artistRepository, CommentRepository commentRepository, WebClient webClient) {
+	public GenreAPI(ArtistRepository artistRepository, CommentRepository commentRepository, WebClient webClient) {
 		this.artistRepository = artistRepository;
 		this.commentRepository = commentRepository;
 		this.webClient = webClient;
@@ -41,17 +47,17 @@ public class GenreApi {
 	@GetMapping("/genres")
 	public List<String> findAll() {
 		return artistRepository.findAll().stream()
-				.map(c->c.getGenre())
+				.map(c -> c.getGenre())
 				.filter(g -> !g.isEmpty())
 				.distinct()
 				.sorted()
 				.collect(Collectors.toList());
 	}
 
-	Comparator<CommentFull> reverseComparator = new Comparator<CommentFull>() {
+	Comparator<CommentFull> dateAsc = new Comparator<CommentFull>() {
 		@Override
 		public int compare(CommentFull i1, CommentFull i2) {
-			return i2.getDate().compareTo(i1.getDate());
+			return i1.getDate().compareTo(i2.getDate());
 		}
 	};
 
@@ -59,7 +65,7 @@ public class GenreApi {
 	public Flux<GenreComment> getGenreComments(@PathVariable String genre) {
 		return Flux.fromStream(commentRepository.findLastCommentsByGenre(genre).stream()
 				.limit(10)
-				.sorted(reverseComparator)
+				.sorted(dateAsc)
 				.map(c -> GenreComment.builder()
 						.artistId(c.getArtistId())
 						.artistName(c.getArtist().getName())
@@ -74,6 +80,9 @@ public class GenreApi {
 				.retrieve()
 				.bodyToFlux(Comment.class)
 				.mapNotNull(comment -> commentToGenreCommentAndSave(comment, genre))
+				.timeout(Duration.ofMillis(Constants.TIMEOUT_STREAM))
+				.onErrorMap(ReadTimeoutException.class, ex -> new HttpTimeoutException("ReadTimeout"))
+				.doOnError(WriteTimeoutException.class, ex -> logger.error("WriteTimeout"))
 				.filter(p -> p != null);
 		return results;
 
@@ -82,20 +91,15 @@ public class GenreApi {
 	private GenreComment commentToGenreCommentAndSave(Comment comment, String genre) {
 		Optional<Artist> artist = artistRepository.findById(comment.getArtist());
 		if (artist.isPresent() && genre.equals(artist.get().getGenre())) {
-			String md5 = DataInitializer.md5(comment.getArtist() + comment.getUserName() + comment.getComment()); 
+			String md5 = DataInitializer.md5(comment.getArtist() + comment.getUserName() + comment.getComment());
 			commentRepository.save(CommentFull.builder()
 					.id(md5)
-					.artistId(comment.getArtist()) 
-					.userName(comment.getUserName()) 
-					.comment(comment.getComment())
-					.build());
-			
-			return GenreComment.builder()
 					.artistId(comment.getArtist())
-					.artistName(artist.get().getName())
 					.userName(comment.getUserName())
 					.comment(comment.getComment())
-					.build();
+					.build());
+
+			return GenreComment.toGenreComment(artist.get(), comment);
 		}
 		else {
 			return null;

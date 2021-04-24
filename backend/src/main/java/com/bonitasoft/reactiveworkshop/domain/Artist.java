@@ -9,9 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-//import org.springframework.data.annotation.Id;
 
-//@Document
 @Entity
 @Data
 @AllArgsConstructor
@@ -20,13 +18,12 @@ import lombok.NoArgsConstructor;
 @Table(name = "artists")
 public class Artist {
 
-    @Id
-    @Column(nullable = false, length = 32)
+	@Id
+	@Column(nullable = false, length = 32)
 	private String id;
-    @Column(nullable = false, length = 200)
+	@Column(nullable = false, length = 200)
 	private String name;
-    @Column(length = 100)
+	@Column(length = 100)
 	private String genre;
-
 
 }
